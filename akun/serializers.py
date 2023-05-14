@@ -1,0 +1,25 @@
+from .models import Akun
+from rest_framework import serializers
+
+class AkunSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Akun
+        fields = ('id', 'nama_pengguna', 'username', 'foto_profil', 'password', 'nomor_whatsapp', 'terverifikasi', 'created_at', 'modified_at')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def validate(self, data):
+        # Mengecek apakah nama_pengguna sudah ada di database
+        if Akun.objects.filter(nama_pengguna=data['nama_pengguna']).exists():
+            raise serializers.ValidationError()
+
+        # Mengecek apakah username sudah ada di database
+        if Akun.objects.filter(username=data['username']).exists():
+            raise serializers.ValidationError()
+
+        # Mengecek apakah nomor_whatsapp sudah ada di database
+        if Akun.objects.filter(nomor_whatsapp=data['nomor_whatsapp']).exists():
+            raise serializers.ValidationError()
+
+        return data

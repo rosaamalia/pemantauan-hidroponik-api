@@ -1,0 +1,4 @@
+venv-ta-api/
+*/__pycache__/
+
+.env

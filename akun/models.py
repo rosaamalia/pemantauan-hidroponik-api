@@ -80,7 +80,7 @@ class KodeVerifikasi(models.Model):
     kode = models.CharField(max_length=5)
     waktu_kirim = models.DateTimeField()
     waktu_kadaluarsa = models.DateTimeField()
-    jumlah_kirim = models.IntegerField(default=0)
+    nomor_whatsapp = models.CharField(max_length=15, default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 

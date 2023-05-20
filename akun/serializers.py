@@ -4,6 +4,11 @@ from rest_framework import serializers
 class AkunSerializer(serializers.ModelSerializer):
     class Meta:
         model = Akun
+        exclude = ('password',)
+
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Akun
         fields = ('id', 'nama_pengguna', 'username', 'foto_profil', 'password', 'nomor_whatsapp', 'terverifikasi', 'created_at', 'modified_at')
         extra_kwargs = {
             'password': {'write_only': True}

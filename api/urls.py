@@ -20,4 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path("api/", include("akun.urls", namespace="akun")),
+    path("api/jenis-tanaman/", include("jenis_tanaman.urls", namespace="jenis_tanaman")),
+    path("api/kebun/", include("kebun.urls", namespace="kebun")),
 ]

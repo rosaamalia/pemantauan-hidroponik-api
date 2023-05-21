@@ -10,65 +10,8 @@ from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Akun, KodeVerifikasi
 from .serializers import RegisterSerializer, AkunSerializer
-
-import os, datetime, requests, random
-from dotenv import load_dotenv
-load_dotenv()
-
-def generate_kode():
-    # Membuat string kode verifikasi yang terdiri dari 5 angka
-    number_string = ''.join(random.choices('0123456789', k=5))
-    return number_string
-
-def kirim_kode_whatsapp(nomor_whatsapp):
-    # Mengirim kode verifikasi menggunakan pesan whatsapp
-    # Jika kode berhasil dikirim, akan mengembalikan kode verifikasi dan waktu pengiriman
-
-    kode = generate_kode()
-    url = os.getenv('WHATSAPP_URL')
-    headers = { 'Authorization': 'Bearer ' + os.getenv('WHATSAPP_TOKEN') }
-    data = {
-        "messaging_product": "whatsapp",
-        "recipient_type": "individual",
-        "to": nomor_whatsapp,
-        "type": "template",
-        "template": {
-            "name": "kode_verifikasi",
-            "language": {
-                "code": "id"
-            },
-            "components": [
-                {
-                    "type": "body",
-                    "parameters": [
-                        {
-                            "type": "text",
-                            "text": kode
-                        }
-                    ]
-                },
-                {
-                    "type": "button",
-                    "sub_type": "url",
-                    "index": "0",
-                    "parameters": [
-                        {
-                            "type": "text",
-                            "text": kode
-                        }
-                    ]
-                }
-            ]
-        }
-    }
-    
-    response = requests.post(url, headers=headers,json=data)
-    data = response.json()
-
-    if "error" in data:
-        return False, None
-    else:
-        return kode, datetime.datetime.now()
+from .utils import kirim_kode_whatsapp
+from kebun.models import Kebun
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -135,12 +78,16 @@ def register(request):
         # Verifikasi kode akan dilakukan setelah pengguna mengirimkan kode ke server
         # dan status data pengguna akan menjadi terverifikasi
 
+        # Menambahkan data jumlah_kebun pada response
+        data_response = serializer.data
+        data_response['jumlah_kebun'] = 0
+
         # Generate token untuk akun
         refresh = RefreshToken.for_user(akun)
 
         return Response({
             "message": "Akun berhasil didaftarkan",
-            "data": serializer.data,
+            "data": data_response,
             "token" : {
                 "refresh": str(refresh.access_token),
                 "access": str(refresh),
@@ -186,6 +133,7 @@ def verify_login(request):
                 "foto_profil": user.foto_profil,
                 "nomor_whatsapp": user.nomor_whatsapp,
                 "terverifikasi": user.terverifikasi,
+                "jumlah_kebun": 0,
                 "created_at": user.created_at,
                 "modified_at": user.modified_at
             }
@@ -220,22 +168,22 @@ def akun_berdasarkan_id(request):
 
         # Mengambil data akun
         data = Akun.objects.get(id=id_akun)
-        # Belum menambahkan jumlah kebun
+        jumlah_kebun = Kebun.objects.filter(id_akun__id=id_akun).count()
 
         if request.method == "GET":
-            serializer = AkunSerializer(instance=data)
+            serializer = AkunSerializer(instance=data, context={'jumlah_kebun': jumlah_kebun})
 
             return Response({"data": serializer.data}, status=status.HTTP_200_OK)
         
         elif request.method == "PUT":
-                serializer = AkunSerializer(data, data=request.data, partial=True)
-                serializer.is_valid()
-                serializer.save()
+            serializer = AkunSerializer(data, data=request.data, partial=True, context={'jumlah_kebun': jumlah_kebun})
+            serializer.is_valid()
+            serializer.save()
 
-                return Response({
-                    "message": "Data berhasil diperbarui.",
-                    "data": serializer.data
-                    }, status=status.HTTP_200_OK)
+            return Response({
+                "message": "Data berhasil diperbarui.",
+                "data": serializer.data
+                }, status=status.HTTP_200_OK)
                 
     except ObjectDoesNotExist:
         return Response({"detail": f"Data akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)

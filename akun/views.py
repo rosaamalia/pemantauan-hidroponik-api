@@ -8,7 +8,6 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
-from .utils import verifikasi_id_akun
 from .models import Akun, KodeVerifikasi
 from .serializers import RegisterSerializer, AkunSerializer
 

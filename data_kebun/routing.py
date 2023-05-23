@@ -1,7 +1,7 @@
-from django.urls import re_path
+from django.urls import path
 from . import consumers
 
 
 websocket_urlpatterns = [
-    re_path(r'ws/data-kebun/terbaru$', consumers.DataKebunConsumer.as_asgi())
+    path("data-kebun/terbaru/<id_kebun>", consumers.DataKebunConsumer.as_asgi())
 ]

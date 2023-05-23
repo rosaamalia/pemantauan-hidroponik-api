@@ -1,61 +1,43 @@
+from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from djangochannelsrestframework import permissions
-from djangochannelsrestframework.generics import GenericAsyncAPIConsumer, action
-from djangochannelsrestframework.mixins import ListModelMixin
-from djangochannelsrestframework.observer import model_observer
-from rest_framework_simplejwt.tokens import AccessToken
+import json
 
 from .models import DataKebun
 from .serializers import DataKebunSerializer
 
-from urllib.parse import parse_qs
+class DataKebunConsumer(AsyncWebsocketConsumer):
+    async def connect (self):
+        print('connected')
+        await self.accept()
+        await self.channel_layer.group_add("data_kebun_terbaru", self.channel_name)
 
-class DataKebunConsumer(ListModelMixin, GenericAsyncAPIConsumer):
-    queryset = DataKebun.objects.all()
-    serializer_class = DataKebunSerializer
-    permission = (permissions.IsAuthenticated,)
-    # authentication = [JWTAuthentication,]
+    async def disconnect(self, code):
+        print(f'connection closed with: {code}')
+        await self.channel_layer.group_discard("data_kebun_terbaru", self.channel_name)
 
-    async def connect(self, **kwargs):
-        await self.model_change.subscribe()
-        await super().connect()
+    async def receive(self, text_data=None, bytes_data=None):
+        text_data_json = json.loads(text_data)
+        id_kebun = text_data_json['id_kebun']
 
-    @model_observer(DataKebun)
-    async def model_change(self, message, observer=None, **kwargs):
-        await self.send_json(message)
+        data_kebun = await self.get_data_kebun_terbaru(id_kebun)
+        
+        await self.send(text_data=json.dumps({
+            'message': data_kebun
+        }))
 
-    @model_change.serializer
-    def model_serialize(self, instance, action, **kwargs):
-        return dict(data=DataKebunSerializer(instance=instance).data, action=action.value)
+    async def get_data_kebun(self, event):
+        id_kebun = self.scope["url_route"]["kwargs"]["id_kebun"]
+        print(id_kebun)
 
-    @action()
-    async def get_latest_data_kebun(self, id_kebun):
-        # Dapatkan ID kebun dari parameter query
-        if id_kebun:
-            try:
-                # # Dapatkan ID pengguna dari token JWT
-                # headers = self.scope['headers']
-                # for header_name, header_value in headers:
-                #     if header_name == b'authorization':
-                #         # Ambil token JWT dari header
-                #         token = header_value.decode().split(' ')[1]
-                #         break
+        data_kebun = await self.get_data_kebun_terbaru(id_kebun)
 
-                # decoded_token = AccessToken(token)
-                # id_user = decoded_token['id']
-
-                # Dapatkan kebun terbaru berdasarkan ID kebun
-                data_kebun = await self.get_latest_data_kebun_async(id_kebun)
-                serializer = DataKebunSerializer(data_kebun)
-
-                # Kirim data kebun terbaru ke klien melalui WebSocket
-                await self.send_json_response(serializer.data)
-            except DataKebun.DoesNotExist:
-                # Tolak permintaan jika kebun tidak ditemukan
-                await self.send_json_response({'detail': 'Kebun not found'}, status=404)
+        await self.send(text_data=json.dumps({
+            'message': data_kebun
+        }))
     
     @database_sync_to_async
-    def get_latest_data_kebun_async(self, id_kebun):
-        # Dapatkan kebun terbaru berdasarkan ID kebun dan ID pengguna
-        return DataKebun.objects.filter(id_kebun__id=id_kebun).order_by('-created_at').first()
+    def get_data_kebun_terbaru(self, id_kebun):
+        data = DataKebun.objects.filter(id_kebun__id=id_kebun).order_by("-created_at").first()
+        serializer = DataKebunSerializer(instance=data)
 
+        return serializer.data

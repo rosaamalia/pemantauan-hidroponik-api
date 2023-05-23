@@ -4,23 +4,24 @@
     <title>Realtime Data</title>
   </head>
   <body>
-    <h1>Realtime Data</h1>
+    <h1>Realtime Data Testing</h1>
 
     <div id="data-container"></div>
 
     <script>
       // Inisialisasi koneksi WebSocket
+      let id_kebun = 4;
       const socket = new WebSocket(
-        "ws://localhost:8000/ws/data-kebun/terbaru/"
+        "ws://" + window.location.host + "/data-kebun/terbaru/" + id_kebun
       );
+      console.log(socket);
 
       // Event listener saat koneksi WebSocket terhubung
       socket.onopen = function (event) {
         console.log("WebSocket connected");
         socket.send(
           JSON.stringify({
-            action: "get_latest_data_kebun",
-            id_kebun: 4,
+            id_kebun: id_kebun,
           })
         );
       };
@@ -31,8 +32,9 @@
         console.log("Received data:", data);
 
         // Tampilkan data kebun pada halaman HTML
+        const message = data["message"];
         const dataContainer = document.getElementById("data-container");
-        dataContainer.innerHTML = data;
+        dataContainer.innerHTML = `<p>id: ${message["id"]}</p><p>tanggal dan waktu: ${message["created_at"]}</p><p>ph: ${message["ph"]}</p><p>temperatur: ${message["temperatur"]}</p><p>tds: ${message["tds"]}</p><p>intensitas_cahaya: ${message["intensitas_cahaya"]}</p><p>kelembapan: ${message["kelembapan"]}</p><p>ec: ${message["ec"]}</p><p>hasil rekomendasi: ${message["hasil_rekomendasi"]}</p>`;
       };
 
       // Tangani peristiwa saat koneksi WebSocket ditutup

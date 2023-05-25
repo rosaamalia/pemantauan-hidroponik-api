@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import tensorflow as tf
 import numpy as np
 
@@ -27,3 +29,13 @@ def prediction(tds, intensitas_cahaya, ph, tflite_model_file):
     output = classify_data(input_details, interpreter, input_data)
 
     return np.argmax(output)
+
+# Konversi rentang tanggal dari string ke DatTimeField
+def konversi_range_tanggal(tanggal_awal, tanggal_akhir):
+    detail_tanggal_awal = tanggal_awal.split('-')
+    tanggal_awal = datetime(int(detail_tanggal_awal[0]), int(detail_tanggal_awal[1]), int(detail_tanggal_awal[2]), 0, 0, 0)
+
+    detail_tanggal_akhir = tanggal_akhir.split('-')
+    tanggal_akhir = datetime(int(detail_tanggal_akhir[0]), int(detail_tanggal_akhir[1]), int(detail_tanggal_akhir[2]), 23, 59, 59)
+    
+    return tanggal_awal, tanggal_akhir

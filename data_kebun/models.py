@@ -8,7 +8,6 @@ class DataKebun(models.Model):
     tds = models.FloatField()
     intensitas_cahaya = models.FloatField()
     kelembapan = models.FloatField()
-    ec = models.FloatField()
     hasil_rekomendasi = models.CharField(max_length=2, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

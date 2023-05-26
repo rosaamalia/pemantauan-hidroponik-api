@@ -39,3 +39,51 @@ def konversi_range_tanggal(tanggal_awal, tanggal_akhir):
     tanggal_akhir = datetime(int(detail_tanggal_akhir[0]), int(detail_tanggal_akhir[1]), int(detail_tanggal_akhir[2]), 23, 59, 59)
     
     return tanggal_awal, tanggal_akhir
+
+# Ubah nama hari dari bahasa inggris ke bahasa indonesia
+def nama_hari(hari):
+    if hari == 'Monday':
+        hari = 'Senin'
+    elif hari == 'Tuesday':
+        hari = 'Selasa'
+    elif hari == 'Wednesday':
+        hari = 'Rabu'
+    elif hari == 'Thursday':
+        hari = 'Kamis'
+    elif hari == 'Friday':
+        hari = 'Jumat'
+    elif hari == 'Saturday':
+        hari = 'Sabtu'
+    elif hari == 'Sunday':
+        hari = 'Minggu'
+    
+    return hari
+
+# Ubah nama bulan dari bahasa inggris ke bahasa indonesia
+def nama_bulan(bulan):
+    if bulan == 'January':
+        bulan = 'Januari'
+    elif bulan == 'February':
+        bulan = 'Februari'
+    elif bulan == 'March':
+        bulan = 'Maret'
+    elif bulan == 'April':
+        bulan = 'April'
+    elif bulan == 'May':
+        bulan = 'Mei'
+    elif bulan == 'June':
+        bulan = 'Juni'
+    elif bulan == 'July':
+        bulan = 'Juli'
+    elif bulan == 'August':
+        bulan = 'Agustus'
+    elif bulan == 'September':
+        bulan = 'September'
+    elif bulan == 'October':
+        bulan = 'Oktober'
+    elif bulan == 'November':
+        bulan = 'November'
+    elif bulan == 'December':
+        bulan = 'Desember'
+
+    return bulan

@@ -5,13 +5,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, Avg
-from django.utils import timezone
-from django.utils.dateparse import parse_date
+from django.db.models import Avg
 from base.utils import paginated_queryset, verifikasi_id_akun
 from kebun.models import Kebun
 from .models import DataKebun
-from .serializers import DataKebunSerializer
+from .serializers import DataKebunSerializer, GetDataKebunSerializer
 from .utils import konversi_range_tanggal
 from datetime import date, timedelta
 
@@ -46,7 +44,7 @@ def data_kebun_berdasarkan_id_kebun(request):
                 data_kebun = DataKebun.objects.filter(id_kebun__id=id_kebun).order_by("-created_at")
             
             paginator, result_page = paginated_queryset(data_kebun, request)
-            serializer = DataKebunSerializer(instance=result_page, many=True)
+            serializer = GetDataKebunSerializer(instance=result_page, many=True)
 
             return paginator.get_paginated_response(serializer.data)
         

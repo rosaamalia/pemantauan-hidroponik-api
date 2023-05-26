@@ -78,28 +78,20 @@ def data_kebun_berdasarkan_id_kebun(request):
     except ObjectDoesNotExist:
         return Response({"detail": f"Data kebun untuk akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
 
-def ambil_data_rata_rata(tanggal, id_kebun):
-    tanggal_awal, tanggal_akhir = konversi_range_tanggal(tanggal, tanggal)
-    data_filter = DataKebun.objects.filter(id_kebun__id=id_kebun, created_at__range=(tanggal_awal, tanggal_akhir))
+def ambil_data_rata_rata(id_kebun, parameter):
+    today = date.today()
+    data = {}
 
-    # Ambil data untuk setiap parameter
-    ph = data_filter.aggregate(avg_value=Avg('ph'))
-    temperatur = data_filter.aggregate(avg_value=Avg('temperatur'))
-    tds = data_filter.aggregate(avg_value=Avg('tds'))
-    intensitas_cahaya = data_filter.aggregate(avg_value=Avg('intensitas_cahaya'))
-    kelembapan = data_filter.aggregate(avg_value=Avg('kelembapan'))
+    for i in range(0, 7):
+        tanggal = str(today - timedelta(days=i))
+        tanggal_awal, tanggal_akhir = konversi_range_tanggal(tanggal, tanggal)
+        data_filter = DataKebun.objects.filter(id_kebun__id=id_kebun, created_at__range=(tanggal_awal, tanggal_akhir))
+        
+        # Ambil data untuk parameter
+        data_parameter = data_filter.aggregate(avg_value=Avg(parameter))
+        data[tanggal] = data_parameter['avg_value']
 
-    # Menggabungkan rata-rata parameter
-    data = {
-        'tanggal': tanggal,
-        'ph': ph['avg_value'],
-        'temperatur': temperatur['avg_value'],
-        'tds': tds['avg_value'],
-        'intensitas_cahaya': intensitas_cahaya['avg_value'],
-        'kelembapan': kelembapan['avg_value'],
-    }
-
-    return data
+    return {str(parameter): data}
 
 
 @api_view(['GET'])
@@ -110,12 +102,12 @@ def data_kebun_rata_rata(request):
     
     id_kebun = request.GET.get('id_kebun')
 
-    today = date.today()
+    parameter = ['ph', 'temperatur', 'tds', 'intensitas_cahaya', 'kelembapan']
     data = []
 
-    for i in range(0, 7):
-        tanggal = str(today - timedelta(days=i))
-        data.append(ambil_data_rata_rata(tanggal, id_kebun))
+    for i in parameter:
+        data_parameter = ambil_data_rata_rata(id_kebun, i)
+        data.append(data_parameter)
 
     return Response({
         "message": "Data berhasil diambil.",

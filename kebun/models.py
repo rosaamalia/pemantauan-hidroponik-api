@@ -61,26 +61,13 @@ class Notifikasi(models.Model):
         db_table = "notifikasi"
 
 class DetailKirimNotifikasi(models.Model):
-    # PH = "ph"
-    # TEMPERATUR = "temperatur"
-    # TDS = "tds"
-    # INTENSITAS_CAHAYA = "intensitas_cahaya"
-    # KELEMBAPAN = "kelembapan"
-    # PARAMETER_CHOICES = [
-    #     (PH, "pH"),
-    #     (TEMPERATUR, "temperatur udara"),
-    #     (TDS, "TDS"),
-    #     (INTENSITAS_CAHAYA, "intensitas cahaya"),
-    #     (KELEMBAPAN, "kelembapan udara")
-    # ]
-
     id_notifikasi = models.ForeignKey(Notifikasi, on_delete=models.CASCADE)
-    pesan = models.CharField(max_length=100, blank=True, null=True)
+    pesan = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "{0} - {1} {2}".format(self.id_notifikasi, self.batas_parameter, self.parameter)
+        return "Notifikasi {0} - {1}".format(self.id_notifikasi, self.id)
     
     class Meta:
         app_label = "kebun"

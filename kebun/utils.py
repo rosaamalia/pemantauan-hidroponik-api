@@ -1,7 +1,10 @@
 from datetime import datetime
-
+from dotenv import load_dotenv
+from .models import DetailKirimNotifikasi
 import tensorflow as tf
 import numpy as np
+import os, requests
+load_dotenv()
 
 def classify_data(input_details, interpreter, data):
   # run inference
@@ -87,3 +90,38 @@ def nama_bulan(bulan):
         bulan = 'Desember'
 
     return bulan
+
+def membuat_pesan(parameter, keadaan):
+    data = [{ "type": "text", "text": parameter }, { "type": "text", "text": keadaan }]
+    return data
+
+def mengirim_pesan_notifikasi(notifikasi, data_parameter, nomor_whatsapp):
+    # Mengirim pesan notifikasi dan menambahkan data ke detail notifikasi
+    url = os.getenv('WHATSAPP_URL')
+    headers = { 'Authorization': 'Bearer ' + os.getenv('WHATSAPP_TOKEN') }
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": nomor_whatsapp,
+        "type": "template",
+        "template": {
+            "name": "notifikasi",
+            "language": {
+                "code": "id"
+            },
+            "components": [
+                {
+                    "type": "body",
+                    "parameters": data_parameter
+                }
+            ]
+        }
+    }
+
+    response = requests.post(url, headers=headers,json=data)
+    data = response.json()
+    print(data)
+    if "error" in data:
+        pass
+    else:
+        DetailKirimNotifikasi.objects.create(id_notifikasi=notifikasi, pesan=data_parameter)

@@ -2,7 +2,7 @@ from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from .models import KodeVerifikasi, Akun
-from kebun.models import KebunDisematkan
+from kebun_disematkan.models import KebunDisematkan
 
 @receiver(pre_save, sender=KodeVerifikasi)
 def set_waktu_kadaluarsa(sender, instance, **kwargs):

@@ -6,10 +6,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from base.utils import paginated_queryset
-from .models import Kebun, KebunDisematkan
-from .serializers import SemuaKebunSerializer, KebunSerializer, KebunDisematkanSerializer, SemuaKebunDisematkanSerializer
-
-# Kebun #
+from .models import Kebun
+from .serializers import SemuaKebunSerializer, KebunSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -100,36 +98,3 @@ def cari_kebun(request):
 
     return paginator.get_paginated_response(serializer.data)
 
-# Kebun Disematkan #
-
-@api_view(['GET', 'PUT'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
-def kebun_disematkan(request):
-    try:
-        id_akun = request.user.id
-        kebun_disematkan = KebunDisematkan.objects.filter(id_akun=id_akun).first()
-
-        # Mengambil semua data kebun disematkan berdasarkan id akun
-        if request.method == "GET":
-            serializer = SemuaKebunDisematkanSerializer(instance=kebun_disematkan)
-
-            return Response({
-                    "message": "Data berhasil diambil.",
-                    "data": serializer.data
-                    }, status=status.HTTP_200_OK)
-        
-        # Meg-update daftar kebun disematkan sesuai dengan id akun
-        elif request.method == "PUT":
-            serializer = KebunDisematkanSerializer(kebun_disematkan, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({
-                    "message": "Data berhasil diperbarui.",
-                    "data": serializer.data
-                    }, status=status.HTTP_200_OK)
-            else:
-                return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-                
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data kebun disematkan untuk akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)

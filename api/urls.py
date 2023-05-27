@@ -22,5 +22,5 @@ urlpatterns = [
     path("api/", include("akun.urls", namespace="akun")),
     path("api/jenis-tanaman/", include("jenis_tanaman.urls", namespace="jenis_tanaman")),
     path("api/kebun/", include("kebun.urls", namespace="kebun")),
-    path("api/data-kebun/", include("data_kebun.urls", namespace="data_kebun")),
+    path("api/kebun-disematkan/", include("kebun_disematkan.urls", namespace="kebun_disematkan")),
 ]

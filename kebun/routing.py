@@ -3,5 +3,5 @@ from . import consumers
 
 
 websocket_urlpatterns = [
-    path("data-kebun/terbaru/<id_kebun>", consumers.DataKebunConsumer.as_asgi())
+    path("kebun/<id_kebun>/data/terbaru", consumers.DataKebunConsumer.as_asgi())
 ]

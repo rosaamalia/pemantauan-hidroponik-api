@@ -53,8 +53,7 @@ INSTALLED_APPS = [
     'akun',
     'jenis_tanaman',
     'kebun',
-    'kebun_disematkan',
-    'notifikasi'
+    'kebun_disematkan'
 ]
 
 CHANNEL_LAYERS = {

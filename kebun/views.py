@@ -148,8 +148,7 @@ def data_kebun_berdasarkan_id_kebun(request, id_kebun):
             #     'kelembapan': param_query.get('kelembapan')
             # }
             data = request.data.copy()
-
-            id_kebun = data['id_kebun']
+            data['id_kebun'] = id_kebun
             kebun = Kebun.objects.get(id=id_kebun)
             verifikasi_id_akun(id_akun, kebun.id_akun.id) # Verifikasi pemilik kebun
 

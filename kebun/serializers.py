@@ -1,4 +1,4 @@
-from .models import Kebun, DataKebun
+from .models import Kebun, DataKebun, Notifikasi
 from jenis_tanaman.serializers import JenisTanamanSerializer
 from rest_framework import serializers
 from .utils import nama_hari, nama_bulan
@@ -45,3 +45,8 @@ class GetDataKebunSerializer(serializers.ModelSerializer):
         tanggal_waktu = datetime.fromisoformat(str(obj.created_at))
 
         return tanggal_waktu.strftime("%H:%M:%S")
+
+class NotifikasiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notifikasi
+        fields = '__all__'

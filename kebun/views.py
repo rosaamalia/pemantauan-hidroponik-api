@@ -7,10 +7,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Avg
 from base.utils import paginated_queryset, verifikasi_id_akun
-from .models import Kebun, DataKebun
-from .serializers import SemuaKebunSerializer, KebunSerializer, DataKebunSerializer, GetDataKebunSerializer
+from .models import Kebun, DataKebun, Notifikasi
+from .serializers import SemuaKebunSerializer, KebunSerializer, DataKebunSerializer, GetDataKebunSerializer, NotifikasiSerializer
 from .utils import konversi_range_tanggal
 from datetime import date, timedelta
+
+# Kebun
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -103,7 +105,6 @@ def cari_kebun(request):
 
 # Data Kebun
 
-# Create your views here.
 def index(request):
     return render(request, "index.html")
 
@@ -199,3 +200,35 @@ def data_kebun_rata_rata(request, id_kebun):
         "message": "Data berhasil diambil.",
         "data": data
         }, status=status.HTTP_200_OK)
+
+# Notifikasi
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def notifikasi(request, id_kebun):
+    try:
+        id_akun = request.user.id
+        notifikasi = Notifikasi.objects.get(id_kebun=id_kebun)
+
+        # Mendapatkan data notifikasi berdasarkan id kebun
+        if request.method == "GET":
+            serializer = NotifikasiSerializer(instance=notifikasi)
+
+            return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+        
+        # Meng-update data notifikasi berdasarkan id kebun
+        elif request.method == "PUT":
+            serializer = NotifikasiSerializer(notifikasi, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    "message": "Data berhasil diperbarui.",
+                    "data": serializer.data
+                    }, status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                
+    except ObjectDoesNotExist:
+        return Response({"detail": f"Data notifikasi kebun dengan id {id_kebun} untuk akun {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)

@@ -61,7 +61,7 @@ def kirim_data_kebun_terbaru(sender, instance, created, **kwargs):
             if data_kebun < min_value:
                 data = membuat_pesan(i.upper(), f"kurang dari {min_value}")
                 parameter.extend(data)
-            elif data_kebun > min_value:
+            elif data_kebun > max_value:
                 data = membuat_pesan(i.upper(), f"lebih dari {max_value}")
                 parameter.extend(data)
             
@@ -72,9 +72,13 @@ def kirim_data_kebun_terbaru(sender, instance, created, **kwargs):
                     mengirim_pesan_notifikasi(data_notifikasi, parameter, data_akun.nomor_whatsapp)
             else:
                 mengirim_pesan_notifikasi(data_notifikasi, parameter, data_akun.nomor_whatsapp)
-
-            parameter.pop()
-            parameter.pop()
+            
+            # Mengeluarkan dua data terakhir untuk parameter selanjutnya
+            if len(parameter) == 4:
+                parameter.pop()
+                parameter.pop()
+            else:
+                pass
 
 @receiver(post_save, sender=Kebun)
 def membuat_notifikasi(sender, instance, created, **kwargs):

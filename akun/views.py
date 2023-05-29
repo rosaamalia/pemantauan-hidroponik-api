@@ -26,10 +26,10 @@ def verifikasi_kode_registrasi(request):
         return Response({"detail": "Kode verifikasi salah."}, status=status.HTTP_400_BAD_REQUEST)
     
     kode_db = kode_db.first()
-    if timezone.now() > kode_db.waktu_kadaluarsa:
-        return Response({"detail": "Kode verifikasi sudah kadaluarsa."}, status=status.HTTP_400_BAD_REQUEST)
+    if timezone.now() > kode_db.waktu_kedaluwarsa:
+        return Response({"detail": "Kode verifikasi sudah kedaluwarsa."}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Jika kode ada dan belum kadaluarsa
+    # Jika kode ada dan belum kedaluwarsa
     # Update data akun menjadi terverifikasi
     Akun.objects.filter(id=kode_db.id_akun.id).update(terverifikasi=True)
         
@@ -260,7 +260,7 @@ def verifikasi_kode_update_nomor_whatsapp(request):
     if not kode_db.exists():
         return Response({"detail": "Kode verifikasi salah."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Mengecek apakah kode milik akun yang sesuai dan kode belum kadaluarsa
+    # Mengecek apakah kode milik akun yang sesuai dan kode belum kedaluwarsa
     id_akun = request.user.id
     data = Akun.objects.get(id=id_akun)
     kode_db_data = kode_db.first()
@@ -268,10 +268,10 @@ def verifikasi_kode_update_nomor_whatsapp(request):
     if kode_db_data.id_akun.id != data.id:
         return Response({"detail": "Kode verifikasi salah."}, status=status.HTTP_400_BAD_REQUEST)
     
-    if timezone.now() > kode_db_data.waktu_kadaluarsa:
-        return Response({"detail": "Kode verifikasi sudah kadaluarsa."}, status=status.HTTP_400_BAD_REQUEST)
+    if timezone.now() > kode_db_data.waktu_kedaluwarsa:
+        return Response({"detail": "Kode verifikasi sudah kedaluwarsa."}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Jika kode ada dan belum kadaluarsa
+    # Jika kode ada dan belum kedaluwarsa
     # Update nomor whatsapp akun
     Akun.objects.filter(id=kode_db_data.id_akun.id).update(nomor_whatsapp=kode_db_data.nomor_whatsapp)
         

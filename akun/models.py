@@ -79,7 +79,7 @@ class KodeVerifikasi(models.Model):
     id_akun = models.ForeignKey(Akun, on_delete=models.CASCADE)
     kode = models.CharField(max_length=5)
     waktu_kirim = models.DateTimeField()
-    waktu_kadaluarsa = models.DateTimeField()
+    waktu_kedaluwarsa = models.DateTimeField()
     nomor_whatsapp = models.CharField(max_length=15, default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

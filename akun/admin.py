@@ -9,5 +9,5 @@ class AkunAdmin(admin.ModelAdmin):
 
 @admin.register(KodeVerifikasi)
 class KodeVerfifikasiAdmin(admin.ModelAdmin):
-    list_display = ("id", "id_akun", "kode", "waktu_kirim", "waktu_kadaluarsa", "nomor_whatsapp", "created_at", "modified_at")
-    search_fields = ("id", "id_akun", "kode", "waktu_kirim", "waktu_kadaluarsa", "nomor_whatsapp")
+    list_display = ("id", "id_akun", "kode", "waktu_kirim", "waktu_kedaluwarsa", "nomor_whatsapp", "created_at", "modified_at")
+    search_fields = ("id", "id_akun", "kode", "waktu_kirim", "waktu_kedaluwarsa", "nomor_whatsapp")

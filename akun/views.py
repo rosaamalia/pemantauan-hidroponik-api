@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Akun, KodeVerifikasi
 from .serializers import RegisterSerializer, AkunSerializer
-from .utils import kirim_kode_whatsapp
+from .utils import kirim_kode_whatsapp, cek_numerik
 from kebun.models import Kebun
 
 @api_view(['POST'])
@@ -40,6 +40,11 @@ def verifikasi_kode_registrasi(request):
 @permission_classes([AllowAny])
 def kirim_kode(request):
     nomor_whatsapp = request.data.get('nomor_whatsapp')
+
+    cek = cek_numerik(nomor_whatsapp)
+    if cek == False:
+        return Response({"detail": "Nomor whatsapp tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
+    
     kode_verifikasi, waktu_kirim = kirim_kode_whatsapp(nomor_whatsapp)
 
     # Menyimpan kode verifikasi baru
@@ -53,8 +58,13 @@ def kirim_kode(request):
 @permission_classes([AllowAny])
 def register(request):
     data = request.data.copy()
-    data["password"] = request.data["kata_sandi"]
-    del data["kata_sandi"]
+    if "kata_sandi" in request.data:
+        data["password"] = request.data["kata_sandi"]
+        del data["kata_sandi"]
+    
+    cek = cek_numerik(data["nomor_whatsapp"])
+    if cek == False:
+        return Response({"detail": "Nomor whatsapp tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = RegisterSerializer(data=data)
 

@@ -1,5 +1,6 @@
 venv-ta-api/
 */__pycache__/
+*/migrations/__pycache__/
 jenis_tanaman/models/
 
 .env

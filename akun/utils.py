@@ -1,7 +1,12 @@
 from django.utils import timezone
-import os, datetime, requests, random
+import os, requests, random, re
 from dotenv import load_dotenv
 load_dotenv()
+
+def cek_numerik(input_string):
+    pattern = r'^\d+$'  # Hanya karakter angka dari awal hingga akhir string
+    match = re.match(pattern, input_string)
+    return bool(match)
 
 def generate_kode():
     # Membuat string kode verifikasi yang terdiri dari 5 angka

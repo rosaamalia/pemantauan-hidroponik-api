@@ -20,10 +20,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        # Mengecek apakah nama_pengguna sudah ada di database
-        if Akun.objects.filter(nama_pengguna=data['nama_pengguna']).exists():
-            raise serializers.ValidationError()
-
         # Mengecek apakah username sudah ada di database
         if Akun.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError()

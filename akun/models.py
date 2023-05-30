@@ -40,7 +40,7 @@ class AkunManager(BaseUserManager):
         return user
 
 class Akun(AbstractBaseUser):
-    nama_pengguna = models.CharField(max_length=50, unique=True)
+    nama_pengguna = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=128)
     foto_profil = models.CharField(max_length=255, blank=True)

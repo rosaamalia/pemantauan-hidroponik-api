@@ -11,6 +11,18 @@ class AkunSerializer(serializers.ModelSerializer):
     def get_jumlah_kebun(self, obj):
         return self.context.get('jumlah_kebun')
 
+class UpdateAkunSerializer(serializers.ModelSerializer):
+    nomor_whatsapp = serializers.CharField(read_only=True)
+    terverifikasi = serializers.BooleanField(read_only=True)
+    jumlah_kebun = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Akun
+        fields= ('id', 'nama_pengguna', 'username', 'foto_profil', 'nomor_whatsapp', 'terverifikasi', 'jumlah_kebun', 'created_at', 'modified_at')
+
+    def get_jumlah_kebun(self, obj):
+        return self.context.get('jumlah_kebun')
+
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Akun

@@ -7,9 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import make_password
-from django.core.exceptions import ObjectDoesNotExist
 from .models import Akun, KodeVerifikasi
-from .serializers import RegisterSerializer, AkunSerializer
+from .serializers import RegisterSerializer, AkunSerializer, UpdateAkunSerializer
 from .utils import kirim_kode_whatsapp, cek_numerik
 from kebun.models import Kebun
 
@@ -61,10 +60,10 @@ def register(request):
     if "kata_sandi" in request.data:
         data["password"] = request.data["kata_sandi"]
         del data["kata_sandi"]
-    
-    cek = cek_numerik(data["nomor_whatsapp"])
-    if cek == False:
-        return Response({"detail": "Nomor whatsapp tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
+    elif "nomor_whatsapp" in request.data:
+        cek = cek_numerik(data["nomor_whatsapp"])
+        if cek == False:
+            return Response({"detail": "Nomor whatsapp tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = RegisterSerializer(data=data)
 
@@ -186,7 +185,7 @@ def akun_berdasarkan_id(request):
             return Response({"data": serializer.data}, status=status.HTTP_200_OK)
         
         elif request.method == "PUT":
-            serializer = AkunSerializer(data, data=request.data, partial=True, context={'jumlah_kebun': jumlah_kebun})
+            serializer = UpdateAkunSerializer(data, data=request.data, partial=True, context={'jumlah_kebun': jumlah_kebun})
             serializer.is_valid()
             serializer.save()
 
@@ -195,8 +194,8 @@ def akun_berdasarkan_id(request):
                 "data": serializer.data
                 }, status=status.HTTP_200_OK)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 # Update Kata Sandi
 @api_view(['PUT'])
@@ -224,9 +223,9 @@ def update_kata_sandi(request):
 
         return Response({"message": "Kata sandi berhasil diperbarui."}, status=status.HTTP_200_OK)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
-
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 # Update Nomor WhatsApp
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -241,6 +240,11 @@ def kirim_kode_update_nomor_whatsapp(request):
 
         # Mengambil data nomor_whatsapp baru dan mengirim kode verifikasi
         nomor_whatsapp = request.data.get('nomor_whatsapp')
+        
+        cek = cek_numerik(nomor_whatsapp)
+        if cek == False:
+            return Response({"detail": "Nomor whatsapp tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
+    
         kode_verifikasi, waktu_kirim = kirim_kode_whatsapp(nomor_whatsapp)
 
         if kode_verifikasi != False:
@@ -253,8 +257,8 @@ def kirim_kode_update_nomor_whatsapp(request):
 
         return Response({"message": "Kode verifikasi telah dikirimkan ke nomor whatsapp Anda."}, status=status.HTTP_200_OK)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 # Verifikasi kode untuk update nomor whatsapp
 @api_view(['POST'])

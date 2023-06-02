@@ -3,7 +3,6 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.core.exceptions import ObjectDoesNotExist
 from .models import KebunDisematkan
 from .serializers import KebunDisematkanSerializer, SemuaKebunDisematkanSerializer
 
@@ -36,5 +35,5 @@ def kebun_disematkan(request):
             else:
                 return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data kebun disematkan untuk akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -8,9 +8,6 @@ from .models import JenisTanaman
 from .serializers import JenisTanamanSerializer
 from base.utils import paginated_queryset
 
-import tensorflow as tf
-import numpy as np
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_jenis_tanaman(request):
@@ -49,45 +46,3 @@ def cari_jenis_tanaman(request):
     serializer = JenisTanamanSerializer(result_page, many=True)
 
     return paginator.get_paginated_response(serializer.data)
-
-def classify_data(input_details, interpreter, data):
-  # run inference
-  interpreter.set_tensor(input_details[0]['index'], data)
-  interpreter.invoke()
-
-  output_details = interpreter.get_output_details()[0]['index']
-  output = interpreter.get_tensor(output_details)
-
-  return output
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def prediction(request):
-    tds = 0.490833
-    light_intensity = 0.861667
-    pH = 0.364933
-
-    tflite_model_file = 'jenis_tanaman/models/tomat/model.tflite'
-
-    with open(tflite_model_file, 'rb') as fid:
-        tflite_model = fid.read()
-
-    interpreter = tf.lite.Interpreter(model_content=tflite_model)
-    interpreter.allocate_tensors()
-
-    input_details = interpreter.get_input_details()
-
-    input_data = np.array([[tds, light_intensity, pH]])
-    input_data = input_data.astype('float32')
-
-    prediction = classify_data(input_details, interpreter, input_data)
-
-    # Menyusun respons JSON dengan hasil prediksi
-    response_data = {
-        'pH': pH,
-        'TDS': tds,
-        'Light Intensity': light_intensity,
-        'prediction': np.argmax(prediction)
-    }
-
-    return Response({"data": response_data}, status=status.HTTP_200_OK)

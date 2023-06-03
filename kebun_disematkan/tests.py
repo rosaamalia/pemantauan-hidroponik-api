@@ -19,7 +19,7 @@ class KebunDisematkanTest(APITestCase):
         self.token = f"Bearer {response_login.data['token']['access']}"
 
         # Token tidak berlaku
-        self.token_tidak_berlaku = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5Mjk2NDQwOSwiaWF0IjoxNjg1MTg4NDA5LCJqdGkiOiJlYzg4ZGZkZDQ1YWQ0OTNmYjU4MTdkNGJkNzM0MzMxOCIsInVzZXJfaWQiOjIxfQ.ZrMKLng_eSX-DpFfT7lSz6r1mzEdXUFqT3tpq61JhAA'
+        self.token_tidak_berlaku = 'Bearer TOKEN_TIDAK_VALID'
 
         jenis_tanaman = JenisTanaman.objects.create(id=1, nama_tanaman='Tomat', foto='image.com', deskripsi='Deskripsi', teks_artikel='Teks artikel', model='path/to/model')
 
@@ -55,7 +55,7 @@ class KebunDisematkanTest(APITestCase):
 
         self.assertEqual(response.status_code, 401)
         self.assertIn('detail', response.data)
-        self.assertEqual(response.data['detail'], 'Pengguna tidak ditemukan')
+        self.assertEqual(response.data['detail'], 'Token yang diberikan tidak valid untuk semua jenis token')
     
     def test_03_mengambil_data_kebun_disematkan_sukses(self):
         KebunDisematkan.objects.filter(id_akun=self.akun.id).update(kebun=[1, 2, 3])
@@ -82,4 +82,4 @@ class KebunDisematkanTest(APITestCase):
 
         self.assertEqual(response.status_code, 401)
         self.assertIn('detail', response.data)
-        self.assertEqual(response.data['detail'], 'Pengguna tidak ditemukan')
+        self.assertEqual(response.data['detail'], 'Token yang diberikan tidak valid untuk semua jenis token')

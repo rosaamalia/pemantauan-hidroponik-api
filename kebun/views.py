@@ -4,13 +4,13 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q, Avg
 from base.utils import paginated_queryset, verifikasi_id_akun
 from .models import Kebun, DataKebun, Notifikasi
 from .serializers import SemuaKebunSerializer, KebunSerializer, DataKebunSerializer, GetDataKebunSerializer, NotifikasiSerializer
-from .utils import konversi_range_tanggal
-from datetime import date, timedelta
+from .utils import konversi_range_tanggal, cek_format_tanggal
+from datetime import datetime, date, timedelta
 
 # Kebun
 
@@ -53,13 +53,18 @@ def kebun(request):
 def kebun_berdasarkan_id(request, id_kebun):
     try:
         id_akun = request.user.id
-        kebun = Kebun.objects.filter(id_akun__id=id_akun).get(id=id_kebun)
+        kebun = Kebun.objects.get(id=id_kebun)
+
+        verifikasi_id_akun(id_akun, kebun.id_akun.id) # Verifikasi pemilik kebun
 
         # Mendapatkan data berdasarkan id kebun
         if request.method == "GET":
             serializer = SemuaKebunSerializer(instance=kebun)
 
-            return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+            return Response({
+                "message": "Data berhasil diambil.",
+                "data": serializer.data
+                }, status=status.HTTP_200_OK)
         
         # Meng-update data kebun berdasarkan id kebun
         elif request.method == "PUT":
@@ -80,6 +85,11 @@ def kebun_berdasarkan_id(request, id_kebun):
             return Response({"message": "Data berhasil dihapus." }, status=status.HTTP_200_OK)
                 
     except Exception as e:
+        if isinstance(e, ObjectDoesNotExist):
+            return Response({"detail": "Data kebun tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+        elif isinstance(e, PermissionDenied):
+            return Response({"detail": "Pengguna tidak diperbolehkan untuk mengakses data."}, status=status.HTTP_401_UNAUTHORIZED)
+        
         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
@@ -90,6 +100,9 @@ def cari_kebun(request):
 
     id_akun = request.user.id
     q = request.GET.get('q')
+
+    if q is None:
+        return Response({"detail": "Paramater 'q' harus diisi."}, status=status.HTTP_400_BAD_REQUEST)
 
     data = Kebun.objects.filter(
         Q(nama_kebun__icontains=q) |
@@ -127,6 +140,12 @@ def data_kebun_berdasarkan_id_kebun(request, id_kebun):
             tanggal_akhir = request.GET.get("tanggal_akhir")
 
             if tanggal_awal != None and tanggal_akhir != None:
+                format_tanggal_awal = cek_format_tanggal(tanggal_awal, "%Y-%m-%d")
+                format_tanggal_akhir = cek_format_tanggal(tanggal_akhir, "%Y-%m-%d")
+
+                if format_tanggal_awal == False or format_tanggal_akhir == False:
+                    return Response({"detail": "Tanggal tidak valid. Tanggal harus dalam format '%Y-%m-%d'."}, status=status.HTTP_400_BAD_REQUEST)
+
                 # Konversi tanggal dalam bentuk DateTimeFiedl
                 tanggal_awal, tanggal_akhir = konversi_range_tanggal(tanggal_awal, tanggal_akhir)
                 data_kebun = DataKebun.objects.filter(id_kebun__id=id_kebun, created_at__range=(tanggal_awal, tanggal_akhir)).order_by("-created_at")
@@ -165,6 +184,11 @@ def data_kebun_berdasarkan_id_kebun(request, id_kebun):
                 return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 
     except Exception as e:
+        if isinstance(e, ObjectDoesNotExist):
+            return Response({"detail": "Data kebun tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+        elif isinstance(e, PermissionDenied):
+            return Response({"detail": "Pengguna tidak diperbolehkan untuk mengakses data."}, status=status.HTTP_401_UNAUTHORIZED)
+        
         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 def ambil_data_rata_rata(id_kebun, parameter):

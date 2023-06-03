@@ -33,6 +33,13 @@ def prediction(tds, intensitas_cahaya, ph, tflite_model_file):
 
     return np.argmax(output)
 
+def cek_format_tanggal(string_tanggal, format_tanggal):
+    try:
+        datetime.strptime(string_tanggal, format_tanggal)
+        return True
+    except ValueError:
+        return False
+
 # Konversi rentang tanggal dari string ke DatTimeField
 def konversi_range_tanggal(tanggal_awal, tanggal_akhir):
     detail_tanggal_awal = tanggal_awal.split('-')

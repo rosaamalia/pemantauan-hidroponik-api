@@ -44,9 +44,9 @@ def kebun(request):
             else:
                 return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data kebun untuk akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
-    
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
@@ -79,9 +79,9 @@ def kebun_berdasarkan_id(request, id_kebun):
             kebun.delete()
             return Response({"message": "Data berhasil dihapus." }, status=status.HTTP_200_OK)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data kebun dengan id {id_kebun} untuk akun {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
-
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
@@ -164,9 +164,9 @@ def data_kebun_berdasarkan_id_kebun(request, id_kebun):
             else:
                 return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data kebun untuk akun dengan id {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
-
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 def ambil_data_rata_rata(id_kebun, parameter):
     today = date.today()
     data = {}
@@ -230,5 +230,5 @@ def notifikasi(request, id_kebun):
             else:
                 return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 
-    except ObjectDoesNotExist:
-        return Response({"detail": f"Data notifikasi kebun dengan id {id_kebun} untuk akun {id_akun} tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

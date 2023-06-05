@@ -451,3 +451,130 @@ class KebunTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('data', response.data)
         self.assertIn(hari_ini, response.data['data'][0]['ph'])
+    
+    def test_33_mengambil_rata_rata_data_kebun_selain_milik_pengguna(self):
+        url = f'/api/kebun/{self.kebun_pengguna_lain.id}/data/rata-rata'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['detail'], 'Pengguna tidak diperbolehkan untuk mengakses data.')
+    
+    def test_34_mengambil_rata_rata_data_kebun_token_invalid(self):
+        url = f'/api/kebun/{self.kebun.id}/data/rata-rata'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token_tidak_berlaku)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['detail'], 'Token yang diberikan tidak valid untuk semua jenis token')
+    
+    def test_35_mengambil_rata_rata_data_kebun_id_tidak_valid(self):
+        url = f'/api/kebun/{self.random_id}/data/rata-rata'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data['detail'], 'Data kebun tidak ditemukan.')
+    
+    """ Model Notifikasi """
+
+    def test_36_mengambil_data_notifikasi_kebun_sukses(self):
+        url = f'/api/kebun/{self.kebun.id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('data', response.data)
+        self.assertEqual(response.data['data']['id_kebun'], self.kebun.id)
+
+    def test_37_mengambil_data_notifikasi_kebun_selain_milik_pengguna(self):
+        url = f'/api/kebun/{self.kebun_pengguna_lain.id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['detail'], 'Pengguna tidak diperbolehkan untuk mengakses data.')
+    
+    def test_38_mengambil_data_notifikasi_kebun_token_invalid(self):
+        url = f'/api/kebun/{self.kebun.id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token_tidak_berlaku)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['detail'], 'Token yang diberikan tidak valid untuk semua jenis token')
+    
+    def test_39_mengambil_data_notifikasi_kebun_id_tidak_valid(self):
+        url = f'/api/kebun/{self.random_id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data['detail'], 'Data kebun tidak ditemukan.')
+    
+    def test_40_update_data_notifikasi_kebun_sukses(self):
+        url = f'/api/kebun/{self.kebun.id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        data = {
+            "intensitas_cahaya_min": 500,
+            "intensitas_cahaya_max": 600,
+            "kelembapan_min": 70,
+            "kelembapan_max": 100
+        }
+        response = self.client.put(url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('data', response.data)
+        self.assertEqual(response.data['data']['id_kebun'], self.kebun.id)
+    
+    def test_41_update_data_notifikasi_kebun_selain_milik_pengguna(self):
+        url = f'/api/kebun/{self.kebun_pengguna_lain.id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        data = {
+            "intensitas_cahaya_min": 500,
+            "intensitas_cahaya_max": 600,
+            "kelembapan_min": 70,
+            "kelembapan_max": 100
+        }
+        response = self.client.put(url, data)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['detail'], 'Pengguna tidak diperbolehkan untuk mengakses data.')
+    
+    def test_42_update_data_notifikasi_kebun_invalid_token(self):
+        url = f'/api/kebun/{self.kebun.id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token_tidak_berlaku)
+        data = {
+            "intensitas_cahaya_min": 500,
+            "intensitas_cahaya_max": 600,
+            "kelembapan_min": 70,
+            "kelembapan_max": 100
+        }
+        response = self.client.put(url, data)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['detail'], 'Token yang diberikan tidak valid untuk semua jenis token')
+    
+    def test_43_update_data_notifikasi_kebun_id_tidak_valid(self):
+        url = f'/api/kebun/{self.random_id}/notifikasi'
+
+        self.client.credentials(HTTP_AUTHORIZATION=self.token)
+        data = {
+            "intensitas_cahaya_min": 500,
+            "intensitas_cahaya_max": 600,
+            "kelembapan_min": 70,
+            "kelembapan_max": 100
+        }
+        response = self.client.put(url, data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data['detail'], 'Data kebun tidak ditemukan.')

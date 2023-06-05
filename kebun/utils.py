@@ -1,3 +1,4 @@
+from django.utils import timezone
 from datetime import datetime
 from dotenv import load_dotenv
 from .models import DetailKirimNotifikasi
@@ -42,11 +43,12 @@ def cek_format_tanggal(string_tanggal, format_tanggal):
 
 # Konversi rentang tanggal dari string ke DatTimeField
 def konversi_range_tanggal(tanggal_awal, tanggal_akhir):
-    detail_tanggal_awal = tanggal_awal.split('-')
-    tanggal_awal = datetime(int(detail_tanggal_awal[0]), int(detail_tanggal_awal[1]), int(detail_tanggal_awal[2]), 0, 0, 0)
+    # Konversi tanggal ke objek datetime dengan timezone
+    tanggal_awal = datetime.strptime(tanggal_awal, "%Y-%m-%d").date()
+    tanggal_awal = timezone.make_aware(datetime.combine(tanggal_awal, datetime.min.time()))
 
-    detail_tanggal_akhir = tanggal_akhir.split('-')
-    tanggal_akhir = datetime(int(detail_tanggal_akhir[0]), int(detail_tanggal_akhir[1]), int(detail_tanggal_akhir[2]), 23, 59, 59)
+    tanggal_akhir = datetime.strptime(tanggal_akhir, "%Y-%m-%d").date()
+    tanggal_akhir = timezone.make_aware(datetime.combine(tanggal_akhir, datetime.max.time()))
     
     return tanggal_awal, tanggal_akhir
 

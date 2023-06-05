@@ -128,12 +128,12 @@ def data_kebun_berdasarkan_id_kebun(request, id_kebun):
     try:
         id_akun = request.user.id
 
+        kebun = Kebun.objects.get(id=id_kebun)
+        verifikasi_id_akun(id_akun, kebun.id_akun.id) # Verifikasi pemilik kebun
+
         if request.method == "GET":
             # Mendapatkan semua data kebun berdasarkan id_kebun
 
-            kebun = Kebun.objects.get(id=id_kebun)
-
-            verifikasi_id_akun(id_akun, kebun.id_akun.id) # Verifikasi pemilik kebun
 
             # Mengambil data rentang tanggal jika ada
             tanggal_awal = request.GET.get("tanggal_awal")
@@ -169,8 +169,6 @@ def data_kebun_berdasarkan_id_kebun(request, id_kebun):
             # }
             data = request.data.copy()
             data['id_kebun'] = id_kebun
-            kebun = Kebun.objects.get(id=id_kebun)
-            verifikasi_id_akun(id_akun, kebun.id_akun.id) # Verifikasi pemilik kebun
 
             serializer = DataKebunSerializer(data=data)
 
@@ -211,19 +209,31 @@ def ambil_data_rata_rata(id_kebun, parameter):
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def data_kebun_rata_rata(request, id_kebun):
-    # Mengambil rata-rata data kebun setiap parameter dalam seminggu
+    try:
+        id_akun = request.user.id
+        kebun = Kebun.objects.get(id=id_kebun)
+        verifikasi_id_akun(id_akun, kebun.id_akun.id) # Verifikasi pemilik kebun
 
-    parameter = ['ph', 'temperatur', 'tds', 'intensitas_cahaya', 'kelembapan']
-    data = []
+        # Mengambil rata-rata data kebun setiap parameter dalam seminggu
+        parameter = ['ph', 'temperatur', 'tds', 'intensitas_cahaya', 'kelembapan']
+        data = []
 
-    for i in parameter:
-        data_parameter = ambil_data_rata_rata(id_kebun, i)
-        data.append(data_parameter)
+        for i in parameter:
+            data_parameter = ambil_data_rata_rata(id_kebun, i)
+            data.append(data_parameter)
 
-    return Response({
-        "message": "Data berhasil diambil.",
-        "data": data
-        }, status=status.HTTP_200_OK)
+        return Response({
+            "message": "Data berhasil diambil.",
+            "data": data
+            }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        if isinstance(e, ObjectDoesNotExist):
+            return Response({"detail": "Data kebun tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+        elif isinstance(e, PermissionDenied):
+            return Response({"detail": "Pengguna tidak diperbolehkan untuk mengakses data."}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Notifikasi
 
@@ -234,6 +244,7 @@ def notifikasi(request, id_kebun):
     try:
         id_akun = request.user.id
         notifikasi = Notifikasi.objects.get(id_kebun=id_kebun)
+        verifikasi_id_akun(id_akun, notifikasi.id_kebun.id_akun.id) # Verifikasi pemilik kebun
 
         # Mendapatkan data notifikasi berdasarkan id kebun
         if request.method == "GET":
@@ -255,4 +266,10 @@ def notifikasi(request, id_kebun):
                 return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                 
     except Exception as e:
+        if isinstance(e, ObjectDoesNotExist):
+            return Response({"detail": "Data kebun tidak ditemukan."}, status=status.HTTP_404_NOT_FOUND)
+        elif isinstance(e, PermissionDenied):
+            return Response({"detail": "Pengguna tidak diperbolehkan untuk mengakses data."}, status=status.HTTP_401_UNAUTHORIZED)
+        
+
         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -23,11 +23,20 @@ def kebun(request):
 
         # Mengambil semua data kebun berdasarkan id akun
         if request.method == "GET":
+            page = request.GET.get('page')
             kebun = Kebun.objects.filter(id_akun=id_akun).order_by("-created_at")
-            paginator, result_page = paginated_queryset(kebun, request)
-            serializer = SemuaKebunSerializer(instance=result_page, many=True)
 
-            return paginator.get_paginated_response(serializer.data)
+            if (page is None):
+                serializer = SemuaKebunSerializer(kebun, many=True)
+                return Response({
+                    "message": "Data berhasil diambil",
+                    "data": serializer.data
+                    }, status=status.HTTP_200_OK)
+            else:
+                paginator, result_page = paginated_queryset(kebun, request)
+                serializer = SemuaKebunSerializer(instance=result_page, many=True)
+
+                return paginator.get_paginated_response(serializer.data)
         
         # Menambahkan data kebun baru sesuai dengan id akun
         elif request.method == "POST":

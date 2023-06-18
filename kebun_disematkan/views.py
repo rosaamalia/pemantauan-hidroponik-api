@@ -16,7 +16,7 @@ def kebun_disematkan(request):
 
         # Mengambil semua data kebun disematkan berdasarkan id akun
         if request.method == "GET":
-            serializer = SemuaKebunDisematkanSerializer(instance=kebun_disematkan)
+            serializer = KebunDisematkanSerializer(instance=kebun_disematkan)
 
             return Response({
                     "message": "Data berhasil diambil.",

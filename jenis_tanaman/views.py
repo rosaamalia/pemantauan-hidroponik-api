@@ -11,11 +11,20 @@ from base.utils import paginated_queryset
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_jenis_tanaman(request):
+    page = request.GET.get('page')
     data = JenisTanaman.objects.all().order_by('nama_tanaman')
-    paginator, result_page = paginated_queryset(data, request)
-    serializer = JenisTanamanSerializer(result_page, many=True)
 
-    return paginator.get_paginated_response(serializer.data)
+    if (page is None):
+        serializer = JenisTanamanSerializer(data, many=True)
+        return Response({
+                "message": "Data berhasil diambil.",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+    else:
+        paginator, result_page = paginated_queryset(data, request)
+        serializer = JenisTanamanSerializer(result_page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

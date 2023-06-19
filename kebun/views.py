@@ -77,7 +77,7 @@ def kebun_berdasarkan_id(request, id_kebun):
         
         # Meng-update data kebun berdasarkan id kebun
         elif request.method == "PUT":
-            serializer = KebunSerializer(kebun, data=request.data, partial=True)
+            serializer = SemuaKebunSerializer(kebun, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -161,7 +161,7 @@ def data_kebun_berdasarkan_id_kebun(request, id_kebun):
             else:
                 data_kebun = DataKebun.objects.filter(id_kebun__id=id_kebun).order_by("-created_at")
             
-            paginator, result_page = paginated_queryset(data_kebun, request)
+            paginator, result_page = paginated_queryset(data_kebun, request, 15)
             serializer = GetDataKebunSerializer(instance=result_page, many=True)
 
             return paginator.get_paginated_response(serializer.data)

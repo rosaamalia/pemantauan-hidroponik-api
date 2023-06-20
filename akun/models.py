@@ -43,7 +43,7 @@ class Akun(AbstractBaseUser):
     nama_pengguna = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=128)
-    foto_profil = models.CharField(max_length=255, blank=True)
+    foto_profil = models.ImageField(upload_to='akun/foto_profil/', blank=True)
     nomor_whatsapp = models.CharField(max_length=15, unique=True)
     terverifikasi = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)

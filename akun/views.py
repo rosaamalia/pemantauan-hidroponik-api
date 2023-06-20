@@ -1,9 +1,10 @@
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import make_password
@@ -11,6 +12,7 @@ from .models import Akun, KodeVerifikasi
 from .serializers import RegisterSerializer, AkunSerializer, UpdateAkunSerializer
 from .utils import kirim_kode_whatsapp, cek_numerik
 from kebun.models import Kebun
+import os
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -169,6 +171,7 @@ def verify_login(request):
 
 # Mendapatkan data akun berdasarkan id dan update data akun
 @api_view(['GET', 'PUT'])
+@parser_classes([MultiPartParser, FormParser])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def akun_berdasarkan_id(request):
@@ -185,7 +188,12 @@ def akun_berdasarkan_id(request):
             return Response({"data": serializer.data}, status=status.HTTP_200_OK)
         
         elif request.method == "PUT":
-            serializer = UpdateAkunSerializer(data, data=request.data, partial=True, context={'jumlah_kebun': jumlah_kebun})
+            # Menghapus foto_profil lama jika ada
+            if data.foto_profil:
+                path_lama = data.foto_profil.path
+                os.remove(path_lama)
+
+            serializer = UpdateAkunSerializer(data, data=request.data, partial=True, context={'jumlah_kebun': jumlah_kebun, 'request': request})
             serializer.is_valid()
             serializer.save()
 
@@ -241,9 +249,15 @@ def kirim_kode_update_nomor_whatsapp(request):
         # Mengambil data nomor_whatsapp baru dan mengirim kode verifikasi
         nomor_whatsapp = request.data.get('nomor_whatsapp')
         
+        # Cek apakah nomor yang didapatkan valid
         cek = cek_numerik(nomor_whatsapp)
         if cek == False:
             return Response({"detail": "Nomor whatsapp tidak valid."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Cek apakah nomor sudah digunakan di akun lain
+        cek_data_sudah_ada = Akun.objects.filter(nomor_whatsapp=nomor_whatsapp)
+        if cek_data_sudah_ada:
+            return Response({"detail": "Nomor whatsapp sudah digunakan."}, status=status.HTTP_400_BAD_REQUEST)
     
         kode_verifikasi, waktu_kirim = kirim_kode_whatsapp(nomor_whatsapp)
 

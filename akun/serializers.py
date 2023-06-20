@@ -22,6 +22,13 @@ class UpdateAkunSerializer(serializers.ModelSerializer):
 
     def get_jumlah_kebun(self, obj):
         return self.context.get('jumlah_kebun')
+    
+    def get_foto_profil(self, obj):
+        if obj.foto_profil:
+            foto_profil_url = self.context['request'].build_absolute_uri(obj.foto_profil.url)
+            return foto_profil_url
+        else:
+            return None
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:

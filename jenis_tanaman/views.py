@@ -15,14 +15,14 @@ def get_jenis_tanaman(request):
     data = JenisTanaman.objects.all().order_by('nama_tanaman')
 
     if (page is None):
-        serializer = JenisTanamanSerializer(data, many=True)
+        serializer = JenisTanamanSerializer(data, many=True, context={'request': request})
         return Response({
                 "message": "Data berhasil diambil.",
                 "data": serializer.data
             }, status=status.HTTP_200_OK)
     else:
         paginator, result_page = paginated_queryset(data, request)
-        serializer = JenisTanamanSerializer(result_page, many=True)
+        serializer = JenisTanamanSerializer(result_page, many=True, context={'request': request})
 
         return paginator.get_paginated_response(serializer.data)
 
@@ -31,7 +31,7 @@ def get_jenis_tanaman(request):
 def jenis_tanaman_berdasarkan_id(request, id_jenis_tanaman):
     try:
         data = JenisTanaman.objects.get(id=id_jenis_tanaman)
-        serializer = JenisTanamanSerializer(instance=data)
+        serializer = JenisTanamanSerializer(instance=data, context={'request': request})
 
         return Response({
                 "message": "Data berhasil diambil.",
@@ -52,6 +52,6 @@ def cari_jenis_tanaman(request):
     ).order_by('id')
 
     paginator, result_page = paginated_queryset(data, request)
-    serializer = JenisTanamanSerializer(result_page, many=True)
+    serializer = JenisTanamanSerializer(result_page, many=True, context={'request': request})
 
     return paginator.get_paginated_response(serializer.data)

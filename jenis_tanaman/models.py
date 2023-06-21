@@ -2,10 +2,10 @@ from django.db import models
 
 class JenisTanaman(models.Model):
     nama_tanaman = models.CharField(max_length=50, unique=True)
-    foto = models.CharField(max_length=256)
+    foto = models.ImageField(upload_to='jenis-tanaman/foto/', blank=True)
     deskripsi = models.CharField(max_length=80)
     teks_artikel = models.TextField()
-    model = models.CharField(max_length=256)
+    model = models.FileField(upload_to='jenis-tanaman/model/')
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 

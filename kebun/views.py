@@ -7,10 +7,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q, Avg
 from base.utils import paginated_queryset, verifikasi_id_akun
+from kebun_disematkan.models import KebunDisematkan
 from .models import Kebun, DataKebun, Notifikasi
 from .serializers import SemuaKebunSerializer, KebunSerializer, DataKebunSerializer, GetDataKebunSerializer, NotifikasiSerializer
 from .utils import konversi_range_tanggal, cek_format_tanggal
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 
 # Kebun
 
@@ -27,14 +28,14 @@ def kebun(request):
             kebun = Kebun.objects.filter(id_akun=id_akun).order_by("-created_at")
 
             if (page is None):
-                serializer = SemuaKebunSerializer(kebun, many=True)
+                serializer = SemuaKebunSerializer(kebun, many=True, context={'request': request})
                 return Response({
                     "message": "Data berhasil diambil",
                     "data": serializer.data
                     }, status=status.HTTP_200_OK)
             else:
                 paginator, result_page = paginated_queryset(kebun, request)
-                serializer = SemuaKebunSerializer(instance=result_page, many=True)
+                serializer = SemuaKebunSerializer(instance=result_page, many=True, context={'request': request})
 
                 return paginator.get_paginated_response(serializer.data)
         
@@ -68,7 +69,7 @@ def kebun_berdasarkan_id(request, id_kebun):
 
         # Mendapatkan data berdasarkan id kebun
         if request.method == "GET":
-            serializer = SemuaKebunSerializer(instance=kebun)
+            serializer = SemuaKebunSerializer(instance=kebun, context={'request': request})
 
             return Response({
                 "message": "Data berhasil diambil.",
@@ -77,7 +78,7 @@ def kebun_berdasarkan_id(request, id_kebun):
         
         # Meng-update data kebun berdasarkan id kebun
         elif request.method == "PUT":
-            serializer = SemuaKebunSerializer(kebun, data=request.data, partial=True)
+            serializer = SemuaKebunSerializer(kebun, data=request.data, partial=True, context={'request': request})
 
             if serializer.is_valid():
                 serializer.save()
@@ -90,6 +91,10 @@ def kebun_berdasarkan_id(request, id_kebun):
         
         # Menghapus data kebun berdasarkan id kebun
         elif request.method == "DELETE":
+            kebun_disematkan = KebunDisematkan.objects.get(id_akun=id_akun)
+            kebun_disematkan.kebun.remove(id_kebun)
+            kebun_disematkan.save()
+
             kebun.delete()
             return Response({"message": "Data berhasil dihapus." }, status=status.HTTP_200_OK)
                 
@@ -121,7 +126,7 @@ def cari_kebun(request):
     ).filter(id_akun__id=id_akun).order_by('-created_at')
 
     paginator, result_page = paginated_queryset(data, request)
-    serializer = SemuaKebunSerializer(result_page, many=True)
+    serializer = SemuaKebunSerializer(result_page, many=True, context={'request': request})
 
     return paginator.get_paginated_response(serializer.data)
 

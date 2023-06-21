@@ -137,17 +137,7 @@ def verify_login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            data_akun = {
-                "id": user.id,
-                "nama_pengguna": user.nama_pengguna,
-                "username": user.username,
-                "foto_profil": user.foto_profil,
-                "nomor_whatsapp": user.nomor_whatsapp,
-                "terverifikasi": user.terverifikasi,
-                "jumlah_kebun": 0,
-                "created_at": user.created_at,
-                "modified_at": user.modified_at
-            }
+            serializer = AkunSerializer(user, context={'request': request})
             
             # Generate token baru
             login(request, user)
@@ -158,7 +148,7 @@ def verify_login(request):
 
             return Response({
                     "message": "Login berhasil",
-                    "data": data_akun,
+                    "data": serializer.data,
                     "token": {
                         'refreh': refresh_token, 
                         'access': access_token
@@ -183,7 +173,7 @@ def akun_berdasarkan_id(request):
         jumlah_kebun = Kebun.objects.filter(id_akun__id=id_akun).count()
 
         if request.method == "GET":
-            serializer = AkunSerializer(instance=data, context={'jumlah_kebun': jumlah_kebun})
+            serializer = AkunSerializer(instance=data, context={'jumlah_kebun': jumlah_kebun, 'request': request})
 
             return Response({"data": serializer.data}, status=status.HTTP_200_OK)
         

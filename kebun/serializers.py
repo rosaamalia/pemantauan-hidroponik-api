@@ -19,7 +19,7 @@ class SemuaKebunSerializer(serializers.ModelSerializer):
         fields = ('id', 'id_akun', 'nama_kebun', 'deskripsi', 'latitude', 'longitude', 'alamat', 'jenis_tanaman','created_at', 'modified_at')
         
     def get_jenis_tanaman(self, obj):
-        return JenisTanamanSerializer(obj.id_jenis_tanaman).data
+        return JenisTanamanSerializer(obj.id_jenis_tanaman, context={'request': self.context['request']}).data
 
 class DataKebunSerializer(serializers.ModelSerializer):
     class Meta:

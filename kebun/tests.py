@@ -32,7 +32,7 @@ class KebunTest(APITestCase):
         # Token tidak berlaku
         self.token_tidak_berlaku = 'Bearer TOKEN_TIDAK_VALID'
 
-        self.jenis_tanaman = JenisTanaman.objects.create(id=1, nama_tanaman='Tomat', foto='image.com', deskripsi='Deskripsi', teks_artikel='Teks artikel', model='jenis_tanaman/models/tomat/model.tflite')
+        self.jenis_tanaman = JenisTanaman.objects.create(id=1, nama_tanaman='Tomat', foto='image.com', deskripsi='Deskripsi', teks_artikel='Teks artikel', model='jenis-tanaman/model/model-tomat.tflite')
 
         kebun = [
             Kebun(id_akun=self.akun, id_jenis_tanaman=self.jenis_tanaman, nama_kebun='Kebun Tomat 1', deskripsi='Deskripsi'),
@@ -65,7 +65,7 @@ class KebunTest(APITestCase):
     """ Model Kebun """
 
     def test_01_mendapatkan_data_kebun_pengguna_sukses(self):
-        url = '/api/kebun/'
+        url = '/api/kebun/?page=1'
 
         self.client.credentials(HTTP_AUTHORIZATION=self.token)
         response = self.client.get(url)
@@ -308,6 +308,7 @@ class KebunTest(APITestCase):
             "intensitas_cahaya": 578
         }
         response = self.client.post(url, data)
+        print(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('data', response.data)

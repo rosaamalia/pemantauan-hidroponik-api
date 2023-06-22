@@ -248,7 +248,7 @@ class AkunTest(APITestCase):
             'nama_pengguna': 'test',
             'username': 'username'
         }
-        response = self.client.put(url, data)
+        response = self.client.put(url, data=data, format='multipart')
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('data', response.data)
@@ -271,7 +271,7 @@ class AkunTest(APITestCase):
         self.assertIn('detail', response.data)
         self.assertEqual(response.data['detail'], 'Token yang diberikan tidak valid untuk semua jenis token')
     
-    def test_17_update_kata_sandi_sukse(self):
+    def test_17_update_kata_sandi_sukses(self):
         url = '/api/akun/update-kata-sandi'
 
         self.client.credentials(HTTP_AUTHORIZATION=self.token)

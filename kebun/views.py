@@ -92,8 +92,9 @@ def kebun_berdasarkan_id(request, id_kebun):
         # Menghapus data kebun berdasarkan id kebun
         elif request.method == "DELETE":
             kebun_disematkan = KebunDisematkan.objects.get(id_akun=id_akun)
-            kebun_disematkan.kebun.remove(id_kebun)
-            kebun_disematkan.save()
+            if id_kebun in kebun_disematkan.kebun:
+                kebun_disematkan.kebun.remove(id_kebun)
+                kebun_disematkan.save()
 
             kebun.delete()
             return Response({"message": "Data berhasil dihapus." }, status=status.HTTP_200_OK)

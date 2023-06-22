@@ -13,7 +13,7 @@ class JenisTanamanTest(APITestCase):
         JenisTanaman.objects.bulk_create(jenis_tanaman)
 
     def test_01_mendapatkan_semua_data_jenis_tanaman(self):
-        url = '/api/jenis-tanaman/'
+        url = '/api/jenis-tanaman/?page=1'
 
         response = self.client.get(url)
         

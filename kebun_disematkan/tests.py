@@ -68,9 +68,7 @@ class KebunDisematkanTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('data', response.data)
         self.assertEqual(response.data['message'], 'Data berhasil diambil.')
-        self.assertEqual(response.data['data']['kebun'][0]['id'], 1)
-        self.assertEqual(response.data['data']['kebun'][1]['id'], 2)
-        self.assertEqual(response.data['data']['kebun'][2]['id'], 3)
+        self.assertEqual(response.data['data']['kebun'], [1,2,3])
     
     def test_04_mengambil_data_kebun_disematkan_gagal(self):
         KebunDisematkan.objects.filter(id_akun=self.akun.id).update(kebun=[1, 2, 3])

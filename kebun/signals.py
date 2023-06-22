@@ -13,7 +13,7 @@ from .utils import prediction, membuat_pesan, mengirim_pesan_notifikasi
 def set_hasil_rekomendasi(sender, instance, **kwargs):
     if not instance.pk:
         kebun = Kebun.objects.get(id=instance.id_kebun.id)
-        path_model = kebun.id_jenis_tanaman.model
+        path_model = kebun.id_jenis_tanaman.model.path
 
         hasil_rekomendasi = prediction(instance.tds, instance.intensitas_cahaya, instance.ph, path_model)
         instance.hasil_rekomendasi = hasil_rekomendasi

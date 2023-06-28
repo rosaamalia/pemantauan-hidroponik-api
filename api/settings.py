@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-5$6i1$6%!hbq1g--&n+1rk=y*ral)hxp2z5$d)ubi6!z0-evxv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.9', 'localhost']
+ALLOWED_HOSTS = ['192.168.1.9', 'localhost', '2a7cb9e07c0f-4560917886921335229.ngrok-free.app']
 
 
 # Application definition
@@ -189,5 +189,6 @@ SIMPLE_JWT = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

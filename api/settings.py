@@ -10,45 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-
-import io
 import os
-
-import environ
-from google.cloud import secretmanager
+from pathlib import Path
+from dotenv import load_dotenv
 from datetime import timedelta
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEMPLATE_DIR = os.path.join(BASE_DIR, 'kebun/template')
+load_dotenv()
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+TEMPLATE_DIR = BASE_DIR / "kebun/template/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# [START gaeflex_py_django_secret_config]
-env = environ.Env(DEBUG=(bool, False))
-# env_file = os.path.join(BASE_DIR, ".env")
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-# Pull secrets from Secret Manager
-project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-
-client = secretmanager.SecretManagerServiceClient()
-settings_name = os.environ.get("SETTINGS_NAME", "django_settings")
-name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
-payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
-
-env.read_env(io.StringIO(payload))
-
-
-SECRET_KEY = env("SECRET_KEY")
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-5$6i1$6%!hbq1g--&n+1rk=y*ral)hxp2z5$d)ubi6!z0-evxv'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Change this to "False" when you are ready for production
-DEBUG = env("DEBUG")
+DEBUG = True
 
-# SECURITY WARNING: App Engine's security features ensure that it is safe to
-# have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
-# app not on App Engine, make sure to set an appropriate host here.
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['192.168.1.9', 'localhost']
 
 
 # Application definition
@@ -78,7 +62,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [(env('REDIS_HOST'), env('REDIS_PORT'))],
+            'hosts': [(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))],
         }
     }
 }
@@ -118,30 +102,16 @@ ASGI_APPLICATION = 'api.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-# Database
-
-# [START dbconfig]
-# [START gaeflex_py_django_database_config]
-# Use django-environ to parse the connection string
-DATABASES = {"default": env.db()}
-
-# If the flag as been set, configure to use proxy
-if os.getenv("USE_CLOUD_SQL_AUTH_PROXY", None):
-    DATABASES["default"]["HOST"] = "127.0.0.1"
-    DATABASES["default"]["PORT"] = 5432
-
-# [END gaeflex_py_django_database_config]
-# [END dbconfig]
-
-# Use a in-memory sqlite3 database when testing in CI systems
-if os.getenv("TRAMPOLINE_CI", None):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT'),
     }
-
+}
 
 
 # Password validation
@@ -176,16 +146,9 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# [START staticurl]
-# [START gaeflex_py_django_static_config]
-# Define static storage via django-storages[google]
-GS_BUCKET_NAME = env("GS_BUCKET_NAME")
-STATIC_URL = "/static/"
-DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
-STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
-GS_DEFAULT_ACL = "publicRead"
-# [END gaeflex_py_django_static_config]
-# [END staticurl]
+# https://docs.djangoproject.com/en/4.0/howto/static-files/
+
+STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -226,3 +189,5 @@ SIMPLE_JWT = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

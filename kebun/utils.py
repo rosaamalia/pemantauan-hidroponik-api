@@ -4,22 +4,10 @@ from dotenv import load_dotenv
 from .models import DetailKirimNotifikasi
 import tensorflow as tf
 import numpy as np
-import os, requests, io
-import environ
-from google.cloud import secretmanager
+import os, requests
+from dotenv import load_dotenv
 
-env = environ.Env(DEBUG=(bool, False))
-# env_file = os.path.join(BASE_DIR, ".env")
-
-# Pull secrets from Secret Manager
-project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-
-client = secretmanager.SecretManagerServiceClient()
-settings_name = os.environ.get("SETTINGS_NAME", "django_settings")
-name = f"projects/{project_id}/secrets/{settings_name}/versions/latest"
-payload = client.access_secret_version(name=name).payload.data.decode("UTF-8")
-
-env.read_env(io.StringIO(payload))
+load_dotenv()
 
 def classify_data(input_details, interpreter, data):
   # run inference
@@ -120,8 +108,8 @@ def membuat_pesan(parameter, keadaan):
 
 def mengirim_pesan_notifikasi(notifikasi, data_parameter, nomor_whatsapp):
     # Mengirim pesan notifikasi dan menambahkan data ke detail notifikasi
-    url = env('WHATSAPP_URL')
-    headers = { 'Authorization': 'Bearer ' + env('WHATSAPP_TOKEN') }
+    url = os.getenv('WHATSAPP_URL')
+    headers = { 'Authorization': 'Bearer ' + os.getenv('WHATSAPP_TOKEN') }
     data = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",

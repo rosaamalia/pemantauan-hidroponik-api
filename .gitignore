@@ -1,7 +1,9 @@
 venv-ta-api/
+venv/
 */__pycache__/
 */migrations/__pycache__/
 jenis_tanaman/models/
 media/
 
 .env
+cloud-sql-proxy.exe
